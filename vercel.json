@@ -1,5 +1,6 @@
 {
   "buildCommand": "cd selfhq && npm run build",
   "outputDirectory": "selfhq/.next",
-  "installCommand": "cd selfhq && npm install"
+  "installCommand": "cd selfhq && npm install",
+  "framework": null
 }
