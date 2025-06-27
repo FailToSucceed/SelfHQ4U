@@ -47,7 +47,7 @@ export default function Home() {
         
         <p className="text-lg text-gray-600 mb-12 max-w-3xl mx-auto">
           Whatever path you choose, the journey is yours to shape — and SelfHQ gives you 
-          the tools to take it in your direction. Whether you're focused on building a business, 
+          the tools to take it in your direction. Whether you&apos;re focused on building a business, 
           nurturing relationships, developing healthy habits, managing your finances, or simply 
           finding balance, SelfHQ helps you grow holistically — across all aspects of life.
         </p>
@@ -234,7 +234,7 @@ export default function Home() {
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-gray-900 mb-8">How It Works</h2>
           <p className="text-xl text-gray-600 mb-16 max-w-3xl mx-auto">
-            It's your life and your journey. You create, tailor & adjust it as you wish. SelfHQ just provides a 
+            It&apos;s your life and your journey. You create, tailor & adjust it as you wish. SelfHQ just provides a 
             personalised holistic methodology designed to support and guide you through consistent, meaningful 
             progress across all areas of life based on your values, vision and mission.
           </p>
