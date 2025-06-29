@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
@@ -82,6 +83,7 @@ const developmentModules = [
 export default function DashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   const handleSignOut = async () => {
     try {
@@ -105,61 +107,97 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center">
-                <span className="text-white font-bold text-lg">S</span>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-sm sm:text-lg">S</span>
               </div>
-              <span className="text-2xl font-bold text-gray-900">SelfHQ</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">SelfHQ</span>
             </div>
             
-            {/* Navigation */}
+            {/* Desktop Navigation */}
             <nav className="hidden md:flex items-center gap-8">
-              <a href="/" className="text-gray-600 hover:text-gray-900">Home</a>
+              <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
               <a href="/dashboard" className="text-gray-900 font-medium">Dashboard</a>
-              <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
+              <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
             </nav>
             
-            {/* Profile & Actions */}
-            <div className="flex items-center gap-4">
-              <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
+            {/* Desktop Profile & Actions */}
+            <div className="hidden sm:flex items-center gap-3">
+              <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
                 <span className="text-sm">👤 Profile</span>
               </button>
               <button
                 onClick={handleSignOut}
-                className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90"
+                className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
               >
                 Sign Out
               </button>
             </div>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="sm:hidden p-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {mobileMenuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
           </div>
+
+          {/* Mobile Menu */}
+          {mobileMenuOpen && (
+            <div className="sm:hidden mt-4 pb-4 border-t border-gray-200 pt-4">
+              <nav className="flex flex-col space-y-4">
+                <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">Home</a>
+                <a href="/dashboard" className="text-gray-900 font-medium">Dashboard</a>
+                <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
+                <div className="border-t border-gray-200 pt-4 mt-4">
+                  <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-3">
+                    <span className="text-sm">👤 Profile</span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
+                  >
+                    Sign Out
+                  </button>
+                </div>
+              </nav>
+            </div>
+          )}
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-8 py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-12">Development Modules</h1>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6 sm:mb-8 lg:mb-12">Development Modules</h1>
         
         {/* Modules Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {developmentModules.map((module) => (
-            <div key={module.id} className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div key={module.id} className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               {/* Icon and Progress */}
-              <div className="flex items-center justify-between mb-6">
-                <div className={`w-12 h-12 ${module.color} rounded-xl flex items-center justify-center text-white text-xl`}>
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${module.color} rounded-xl flex items-center justify-center text-white text-lg sm:text-xl`}>
                   {module.icon}
                 </div>
-                <span className="text-sm text-gray-500 font-medium">{module.progress}% Complete</span>
+                <span className="text-xs sm:text-sm text-gray-500 font-medium">{module.progress}% Complete</span>
               </div>
               
               {/* Title and Description */}
-              <h3 className="text-xl font-bold text-gray-900 mb-4">{module.title}</h3>
-              <p className="text-gray-600 text-sm mb-6 leading-relaxed">{module.description}</p>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">{module.title}</h3>
+              <p className="text-gray-600 text-sm mb-4 sm:mb-6 leading-relaxed">{module.description}</p>
               
               {/* Progress Bar */}
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div 
                     className="bg-gradient-to-r from-teal-500 to-purple-600 h-2 rounded-full transition-all duration-300"
@@ -169,9 +207,9 @@ export default function DashboardPage() {
               </div>
               
               {/* Continue Button */}
-              <button className="w-full flex items-center justify-between text-gray-900 font-medium hover:text-teal-600 transition-colors group">
-                <span>Continue</span>
-                <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <button className="w-full flex items-center justify-between text-gray-900 font-medium hover:text-teal-600 transition-colors group py-2">
+                <span className="text-sm sm:text-base">Continue</span>
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
               </button>
