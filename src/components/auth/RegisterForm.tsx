@@ -47,7 +47,11 @@ export default function RegisterForm() {
     }
 
     try {
-      await signUp(email, password)
+      await signUp(email, password, {
+        firstName,
+        lastName,
+        address
+      })
       setMessage('Application submitted successfully! Check your email to confirm your account.')
       setFirstName('')
       setLastName('')
