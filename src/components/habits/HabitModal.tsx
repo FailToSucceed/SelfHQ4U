@@ -7,9 +7,18 @@ interface Habit {
   title: string
   description: string
   category: string
-  creator: string
-  isPrivate: boolean
+  category_id?: string
+  creator_id: string
+  user_id?: string
+  is_private: boolean
   price?: number
+  difficulty?: string
+  frequency?: string
+  estimated_time?: number
+  tags?: string[]
+  is_active?: boolean
+  created_at?: string
+  updated_at?: string
 }
 
 interface HabitModalProps {
@@ -26,8 +35,11 @@ export default function HabitModal({ isOpen, onClose, selectedCategory = 'genera
     title: '',
     description: '',
     category: selectedCategory,
-    isPrivate: false,
-    price: 0
+    is_private: false,
+    price: 0,
+    difficulty: 'medium',
+    frequency: 'daily',
+    estimated_time: 15
   })
 
   // Mock habit data - replace with real data from Supabase
@@ -37,24 +49,36 @@ export default function HabitModal({ isOpen, onClose, selectedCategory = 'genera
       title: 'Daily Meditation',
       description: '10 minutes of mindfulness meditation every morning',
       category: 'Mind & Mental',
-      creator: 'SelfHQ Team',
-      isPrivate: false
+      creator_id: '00000000-0000-0000-0000-000000000000',
+      is_private: false,
+      price: 0,
+      difficulty: 'easy',
+      frequency: 'daily',
+      estimated_time: 10
     },
     {
       id: '2',
       title: 'Gratitude Journal',
       description: 'Write 3 things you\'re grateful for each evening',
       category: 'Mind & Mental',
-      creator: 'Dr. Sarah Johnson',
-      isPrivate: false
+      creator_id: '00000000-0000-0000-0000-000000000000',
+      is_private: false,
+      price: 0,
+      difficulty: 'easy',
+      frequency: 'daily',
+      estimated_time: 5
     },
     {
       id: '3',
       title: 'Morning Workout',
       description: '30-minute strength training session',
       category: 'Body & Physique',
-      creator: 'Fitness Pro',
-      isPrivate: false
+      creator_id: '00000000-0000-0000-0000-000000000000',
+      is_private: false,
+      price: 0,
+      difficulty: 'medium',
+      frequency: 'daily',
+      estimated_time: 30
     }
   ]
 
@@ -142,8 +166,16 @@ export default function HabitModal({ isOpen, onClose, selectedCategory = 'genera
                   <div key={habit.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                     <h3 className="font-semibold text-gray-900 mb-2">{habit.title}</h3>
                     <p className="text-gray-600 text-sm mb-4">{habit.description}</p>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs text-gray-500">
+                        {habit.difficulty} • {habit.frequency} • {habit.estimated_time} min
+                      </span>
+                      {habit.price && habit.price > 0 && (
+                        <span className="text-xs text-green-600 font-medium">${habit.price}</span>
+                      )}
+                    </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-xs text-gray-500">by {habit.creator}</span>
+                      <span className="text-xs text-gray-500">SelfHQ Community</span>
                       <button
                         onClick={() => handleAdoptHabit(habit.id)}
                         className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90"
@@ -212,6 +244,53 @@ export default function HabitModal({ isOpen, onClose, selectedCategory = 'genera
                   </select>
                 </div>
 
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Difficulty
+                    </label>
+                    <select
+                      value={newHabit.difficulty}
+                      onChange={(e) => setNewHabit({ ...newHabit, difficulty: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    >
+                      <option value="easy">Easy</option>
+                      <option value="medium">Medium</option>
+                      <option value="hard">Hard</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Frequency
+                    </label>
+                    <select
+                      value={newHabit.frequency}
+                      onChange={(e) => setNewHabit({ ...newHabit, frequency: e.target.value })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                    >
+                      <option value="daily">Daily</option>
+                      <option value="weekly">Weekly</option>
+                      <option value="monthly">Monthly</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Estimated Time (minutes)
+                    </label>
+                    <input
+                      type="number"
+                      value={newHabit.estimated_time}
+                      onChange={(e) => setNewHabit({ ...newHabit, estimated_time: Number(e.target.value) })}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                      placeholder="15"
+                      min="1"
+                      max="480"
+                    />
+                  </div>
+                </div>
+
                 {/* Premium Features */}
                 {userIsPremium && (
                   <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-2xl p-6 border border-purple-200">
@@ -224,8 +303,8 @@ export default function HabitModal({ isOpen, onClose, selectedCategory = 'genera
                       <label className="flex items-center gap-3">
                         <input
                           type="checkbox"
-                          checked={newHabit.isPrivate}
-                          onChange={(e) => setNewHabit({ ...newHabit, isPrivate: e.target.checked })}
+                          checked={newHabit.is_private}
+                          onChange={(e) => setNewHabit({ ...newHabit, is_private: e.target.checked })}
                           className="w-4 h-4 text-teal-600 border-gray-300 rounded focus:ring-teal-500"
                         />
                         <span className="text-sm text-gray-700">
@@ -233,7 +312,7 @@ export default function HabitModal({ isOpen, onClose, selectedCategory = 'genera
                         </span>
                       </label>
 
-                      {newHabit.isPrivate && (
+                      {newHabit.is_private && (
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Price (if you want to sell this habit)
