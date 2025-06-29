@@ -84,6 +84,7 @@ export default function DashboardPage() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [expandedModule, setExpandedModule] = useState<number | null>(null)
 
   const handleSignOut = async () => {
     try {
@@ -178,11 +179,162 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mb-6 sm:mb-8 lg:mb-12">Development Modules</h1>
-        <div className="text-xs text-gray-400 mb-2">Version: Mobile-Optimized v2.0</div>
-        
-        {/* Modules Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        {expandedModule ? (
+          // Expanded Module View
+          <div className="space-y-6">
+            {/* Back Button */}
+            <button
+              onClick={() => setExpandedModule(null)}
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back to Dashboard
+            </button>
+
+            {/* Module Header */}
+            {(() => {
+              const module = developmentModules.find(m => m.id === expandedModule)
+              if (!module) return null
+              
+              return (
+                <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8">
+                  <div className="flex items-center gap-6 mb-6">
+                    <div className={`w-16 h-16 ${module.color} rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg`}>
+                      {module.icon}
+                    </div>
+                    <div className="flex-1">
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">{module.title}</h1>
+                      <p className="text-gray-600 mb-4">{module.description}</p>
+                      <div className="flex items-center gap-4">
+                        <div className="flex-1">
+                          <div className="w-full bg-gray-200 rounded-full h-3">
+                            <div 
+                              className="bg-gradient-to-r from-teal-500 to-purple-600 h-3 rounded-full transition-all duration-300"
+                              style={{ width: `${module.progress}%` }}
+                            ></div>
+                          </div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-500">{module.progress}% Complete</span>
+                        <button className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">
+                          Continue Learning
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tab Navigation */}
+                  <div className="border-b border-gray-200 mb-8">
+                    <nav className="flex space-x-8">
+                      <button className="border-b-2 border-teal-500 text-teal-600 font-medium py-2">Overview</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Habits</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Challenges</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">AI Assistant</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Reflection</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Resources</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Mentors</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Courses</button>
+                      <button className="text-gray-500 hover:text-gray-700 py-2">Events</button>
+                    </nav>
+                  </div>
+
+                  {/* Content Area */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Module Overview */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Module Overview</h3>
+                      <p className="text-gray-600 mb-4">Key concepts and goals for this development area</p>
+                      <p className="text-gray-700 mb-6">
+                        This module focuses on helping you develop your {module.title.toLowerCase()} through structured lessons, 
+                        assessments, and practical exercises. By the end, you'll have a clear understanding of how to 
+                        integrate these concepts into your daily life.
+                      </p>
+                      <h4 className="font-semibold text-gray-900 mb-3">What You'll Learn:</h4>
+                      <ul className="space-y-2 text-gray-600">
+                        <li>• Understand the importance of {module.title.toLowerCase()} in your overall development</li>
+                        <li>• Learn practical techniques to improve in this area</li>
+                        <li>• Create an action plan tailored to your personal situation</li>
+                        <li>• Track your progress and adapt as you grow</li>
+                      </ul>
+                    </div>
+
+                    {/* Your Progress */}
+                    <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+                      <h3 className="text-xl font-bold text-gray-900 mb-4">Your Progress</h3>
+                      <p className="text-gray-600 mb-6">Current status and next steps</p>
+                      
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Lessons Completed</span>
+                          <span className="font-medium">2 / 4</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div className="bg-gradient-to-r from-teal-500 to-purple-600 h-2 rounded-full" style={{ width: '50%' }}></div>
+                        </div>
+
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Assessment</span>
+                          <span className="text-orange-600 font-medium">Incomplete</span>
+                        </div>
+
+                        <div className="bg-gray-50 rounded-lg p-4 mt-6">
+                          <h4 className="font-semibold text-gray-900 mb-2">Recommended Next Steps:</h4>
+                          <p className="text-gray-600 text-sm">
+                            Complete the module assessment to establish your baseline and receive personalized recommendations.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
+          </div>
+        ) : (
+          // Main Dashboard View
+          <div className="space-y-8">
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Development Modules</h1>
+            
+            {/* Overview Card */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Your SelfHQ Overview</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Current Habits</h3>
+                  <div className="text-3xl font-bold text-teal-600">12</div>
+                  <p className="text-gray-600 text-sm">Active habits</p>
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Mission Statement</h3>
+                  <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                    "To live authentically and inspire others"
+                  </div>
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Vision</h3>
+                  <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                    "Creating meaningful impact"
+                  </div>
+                </div>
+                <div className="text-center">
+                  <h3 className="font-semibold text-gray-900 mb-2">Core Values</h3>
+                  <div className="text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
+                    "Integrity, Growth, Connection"
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 p-4 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg border border-teal-200">
+                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                  <span className="text-teal-600">🤖</span>
+                  Personal AI Assistant
+                </h3>
+                <p className="text-gray-600 text-sm">Your AI assistant is ready to help you with personalized guidance and insights. (Coming soon)</p>
+              </div>
+            </div>
+
+            {/* Modules Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {developmentModules.map((module) => (
             <div key={module.id} className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
               {/* Icon and Progress */}
@@ -208,7 +360,10 @@ export default function DashboardPage() {
               </div>
               
               {/* Continue Button */}
-              <button className="w-full flex items-center justify-between text-gray-900 font-medium hover:text-teal-600 transition-colors group py-2">
+              <button 
+                onClick={() => setExpandedModule(module.id)}
+                className="w-full flex items-center justify-between text-gray-900 font-medium hover:text-teal-600 transition-colors group py-2"
+              >
                 <span className="text-sm sm:text-base">Continue</span>
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -216,7 +371,9 @@ export default function DashboardPage() {
               </button>
             </div>
           ))}
-        </div>
+            </div>
+          </div>
+        )}
       </main>
     </div>
   )

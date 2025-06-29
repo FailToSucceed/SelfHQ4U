@@ -1,8 +1,14 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { signOut } from '@/lib/auth'
+import { useRouter } from 'next/navigation'
 
 export default function Home() {
+  const { user } = useAuth()
+  const router = useRouter()
+
   // Animated text rotation
   const phrases = [
     'high achievers', 'entrepreneurs', 'happy individuals', 'leaders', 'people walking their own paths', 'learners',
@@ -22,6 +28,15 @@ export default function Home() {
 
     return () => clearInterval(interval)
   }, [])
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      router.refresh()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
+  }
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -34,16 +49,30 @@ export default function Home() {
         </div>
         
         <nav className="hidden md:flex items-center gap-8">
-          <a href="#" className="text-gray-600 hover:text-gray-900">Home</a>
-          <a href="#" className="text-gray-600 hover:text-gray-900">Dashboard</a>
+          <a href="/" className="text-gray-600 hover:text-gray-900">Home</a>
+          {user && <a href="/dashboard" className="text-gray-600 hover:text-gray-900">Dashboard</a>}
           <a href="#" className="text-gray-600 hover:text-gray-900">About</a>
         </nav>
         
         <div className="flex items-center gap-4">
-          <a href="/login" className="text-gray-600 hover:text-gray-900">Login</a>
-          <a href="/register" className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">
-            Get Started
-          </a>
+          {user ? (
+            <>
+              <span className="text-gray-600 text-sm">Welcome, {user.email}</span>
+              <button
+                onClick={handleSignOut}
+                className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90"
+              >
+                Sign Out
+              </button>
+            </>
+          ) : (
+            <>
+              <a href="/login" className="text-gray-600 hover:text-gray-900">Login</a>
+              <a href="/register" className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">
+                Get Started
+              </a>
+            </>
+          )}
         </div>
       </header>
 
