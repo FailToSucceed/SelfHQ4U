@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { signUp } from '@/lib/auth'
 
 export default function RegisterForm() {
@@ -13,6 +13,18 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+
+  // Animated text rotation
+  const phrases = ['high achievers', 'entrepreneurs', 'happy individuals', 'leaders', 'people walking their own paths', 'learners']
+  const [currentPhrase, setCurrentPhrase] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPhrase((prev) => (prev + 1) % phrases.length)
+    }, 2500) // Change every 2.5 seconds
+
+    return () => clearInterval(interval)
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -45,7 +57,15 @@ export default function RegisterForm() {
   return (
     <div className="max-w-lg mx-auto mt-8 p-8 bg-white/90 backdrop-blur-sm rounded-2xl shadow-2xl border border-gray-200/50">
       <h2 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Apply for your SelfHQ</h2>
-      <p className="text-center text-gray-600 mb-8">Join the exclusive community of high achievers</p>
+      <p className="text-center text-gray-600 mb-8">
+        Join the exclusive community of{' '}
+        <span 
+          className="bg-gradient-to-r from-teal-500 to-blue-600 bg-clip-text text-transparent font-semibold transition-all duration-500 ease-in-out"
+          key={currentPhrase}
+        >
+          {phrases[currentPhrase]}
+        </span>
+      </p>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-2 gap-4">
@@ -108,7 +128,7 @@ export default function RegisterForm() {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-              Password
+              Create password
             </label>
             <input
               type="password"
