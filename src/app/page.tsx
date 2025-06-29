@@ -1,4 +1,27 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+
 export default function Home() {
+  // Animated text rotation
+  const phrases = [
+    'high achievers', 'entrepreneurs', 'happy individuals', 'leaders', 'people walking their own paths', 'learners',
+    'motivation specialists', 'curious learners', 'visionaries', 'holistic practitioners', 'resilience builders',
+    'thought leaders', 'ambitious starters', 'longevity strategists', 'masterminds', 'driven builders',
+    'success coaches', 'emerging changemakers', 'guides', 'biohackers', 'enthusiasts', 'innovators',
+    'life architects', 'passionate explorers', 'performance mentors', 'mental health advocates', 'influencers',
+    'personal growth consultants', 'productivity trainers', 'health coaches', 'mindfulness guides',
+    'wellness experts', 'architects', 'pioneers', 'catalysts', 'aspiring trailblazers'
+  ]
+  const [currentPhrase, setCurrentPhrase] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentPhrase((prev) => (prev + 1) % phrases.length)
+    }, 2500) // Change every 2.5 seconds
+
+    return () => clearInterval(interval)
+  }, [])
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -299,7 +322,14 @@ export default function Home() {
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-3xl font-bold text-gray-900 mb-4">Join Our Pilot Program</h2>
           <p className="text-gray-600 mb-8">
-            Be among the first to experience SelfHQ when we launch our MVP. Sign up now for free early access.
+            Join the exclusive community of{' '}
+            <span 
+              className="bg-gradient-to-r from-teal-500 to-blue-600 bg-clip-text text-transparent font-semibold transition-all duration-500 ease-in-out"
+              key={currentPhrase}
+            >
+              {phrases[currentPhrase]}
+            </span>
+            {' '}and be among the first to experience SelfHQ when we launch our MVP.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">

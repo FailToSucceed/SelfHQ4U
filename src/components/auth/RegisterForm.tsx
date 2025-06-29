@@ -15,7 +15,15 @@ export default function RegisterForm() {
   const [error, setError] = useState('')
 
   // Animated text rotation
-  const phrases = ['high achievers', 'entrepreneurs', 'happy individuals', 'leaders', 'people walking their own paths', 'learners']
+  const phrases = [
+    'high achievers', 'entrepreneurs', 'happy individuals', 'leaders', 'people walking their own paths', 'learners',
+    'motivation specialists', 'curious learners', 'visionaries', 'holistic practitioners', 'resilience builders',
+    'thought leaders', 'ambitious starters', 'longevity strategists', 'masterminds', 'driven builders',
+    'success coaches', 'emerging changemakers', 'guides', 'biohackers', 'enthusiasts', 'innovators',
+    'life architects', 'passionate explorers', 'performance mentors', 'mental health advocates', 'influencers',
+    'personal growth consultants', 'productivity trainers', 'health coaches', 'mindfulness guides',
+    'wellness experts', 'architects', 'pioneers', 'catalysts', 'aspiring trailblazers'
+  ]
   const [currentPhrase, setCurrentPhrase] = useState(0)
 
   useEffect(() => {
