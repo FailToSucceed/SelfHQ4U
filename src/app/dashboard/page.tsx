@@ -1,9 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
+import { supabase } from '@/lib/supabase'
+import WelcomePopup from '@/components/onboarding/WelcomePopup'
 
 const developmentModules = [
   {
@@ -85,6 +87,38 @@ export default function DashboardPage() {
   const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [expandedModule, setExpandedModule] = useState<number | null>(null)
+  const [showWelcomePopup, setShowWelcomePopup] = useState(false)
+  const [isFirstTime, setIsFirstTime] = useState(false)
+
+  // Check if user is first-time visitor
+  useEffect(() => {
+    if (user) {
+      checkFirstTimeUser()
+    }
+  }, [user])
+
+  const checkFirstTimeUser = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('onboarding_completed')
+        .eq('id', user?.id)
+        .single()
+
+      if (error) {
+        console.error('Error checking onboarding status:', error)
+        return
+      }
+
+      // If onboarding_completed is null or false, show welcome popup
+      if (!data?.onboarding_completed) {
+        setIsFirstTime(true)
+        setShowWelcomePopup(true)
+      }
+    } catch (error) {
+      console.error('Error in checkFirstTimeUser:', error)
+    }
+  }
 
   const handleSignOut = async () => {
     try {
@@ -92,6 +126,35 @@ export default function DashboardPage() {
       router.push('/login')
     } catch (error) {
       console.error('Error signing out:', error)
+    }
+  }
+
+  const handleStartAssessment = async () => {
+    // Mark onboarding as completed
+    await markOnboardingCompleted()
+    setShowWelcomePopup(false)
+    // Navigate to Values, Vision, Mission module
+    setExpandedModule(1)
+  }
+
+  const handleSkipAssessment = async () => {
+    // Mark onboarding as completed
+    await markOnboardingCompleted()
+    setShowWelcomePopup(false)
+  }
+
+  const markOnboardingCompleted = async () => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ onboarding_completed: true })
+        .eq('id', user?.id)
+
+      if (error) {
+        console.error('Error updating onboarding status:', error)
+      }
+    } catch (error) {
+      console.error('Error in markOnboardingCompleted:', error)
     }
   }
 
@@ -375,6 +438,14 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
+
+      {/* Welcome Popup for First-Time Users */}
+      <WelcomePopup
+        isOpen={showWelcomePopup}
+        onClose={() => setShowWelcomePopup(false)}
+        onStartAssessment={handleStartAssessment}
+        onSkipAssessment={handleSkipAssessment}
+      />
     </div>
   )
 }
