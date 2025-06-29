@@ -53,45 +53,45 @@ export default function Home() {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-          <a href="/register" className="bg-gradient-to-r from-teal-500 to-purple-600 text-white px-8 py-4 rounded-lg font-medium text-lg hover:opacity-90 flex items-center gap-2">
-            Start by opening your HQ
+          <a href="/register" className="bg-gradient-to-r from-teal-500 to-purple-600 text-white px-8 py-4 rounded-lg font-medium text-lg hover:opacity-90 flex items-center gap-2 shadow-xl">
+            Request to open your HQ
             <span>→</span>
           </a>
-          <a href="/dashboard" className="text-gray-900 font-medium text-lg hover:text-gray-700">
+          <a href="/dashboard-preview" className="text-gray-900 font-medium text-lg hover:text-gray-700 flex items-center gap-2">
             See example of the dashboard
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+            </svg>
           </a>
         </div>
       </section>
 
       {/* Feature Cards */}
-      <section className="px-8 py-16 max-w-7xl mx-auto">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Self-awareness</h3>
+      <section className="px-8 py-12 max-w-7xl mx-auto">
+        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3 mb-8">
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Self-awareness</h3>
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Goal tracking</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Goal tracking</h3>
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Life balance</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Life balance</h3>
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">AI tools and agents</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">AI tools and agents</h3>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Goal suggestions</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Goal suggestions</h3>
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Third-party integrations</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Third-party integrations</h3>
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Your annual strategy</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Your annual strategy</h3>
           </div>
-          <div className="bg-gray-50 p-6 rounded-lg text-center">
-            <h3 className="font-semibold text-gray-900 mb-2">Your annual statement</h3>
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-4 rounded-xl text-center hover:shadow-md transition-shadow">
+            <h3 className="font-medium text-gray-900 text-sm">Your annual statement</h3>
           </div>
         </div>
       </section>

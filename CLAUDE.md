@@ -85,6 +85,18 @@ Create a modern platform that helps people:
 8️⃣ Align component suggestions with provided Figma (unfinished draft)
 9️⃣ Consider future scalability and cross-device support
 
+## 🎨 Design & Brand Guidelines
+
+**Visual Identity**: SelfHQ should exude **exclusivity, prestige, and modern sophistication**
+- Use premium gradients, subtle shadows, and refined typography
+- Implement glassmorphism effects (backdrop-blur, transparency)
+- Apply luxury color palettes with deep blues, elegant grays, and accent teals
+- Create elevated user experiences that feel exclusive and high-end
+- Design should appeal to high achievers and ambitious professionals
+- All interactions should feel premium and intentional
+- Use sophisticated animations and micro-interactions
+- Maintain clean, minimal aesthetics with purposeful whitespace
+
 ## 🚀 Development Commands
 
 - `npm run dev` - Start development server
