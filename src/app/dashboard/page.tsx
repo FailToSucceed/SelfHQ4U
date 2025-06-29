@@ -1,11 +1,15 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
+// Force dynamic rendering for this page
+export const dynamic = 'force-dynamic'
 import { useAuth } from '@/contexts/AuthContext'
 import { signOut } from '@/lib/auth'
 import { useRouter } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 import WelcomePopup from '@/components/onboarding/WelcomePopup'
+import HabitModal from '@/components/habits/HabitModal'
 
 const developmentModules = [
   {
@@ -89,36 +93,39 @@ export default function DashboardPage() {
   const [expandedModule, setExpandedModule] = useState<number | null>(null)
   const [showWelcomePopup, setShowWelcomePopup] = useState(false)
   const [isFirstTime, setIsFirstTime] = useState(false)
+  const [showHabitModal, setShowHabitModal] = useState(false)
+  const [selectedHabitCategory, setSelectedHabitCategory] = useState('general')
 
   // Check if user is first-time visitor
   useEffect(() => {
+    const checkFirstTimeUser = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('onboarding_completed')
+          .eq('id', user?.id)
+          .single()
+
+        if (error) {
+          console.error('Error checking onboarding status:', error)
+          return
+        }
+
+        // If onboarding_completed is null or false, show welcome popup
+        if (!data?.onboarding_completed) {
+          setIsFirstTime(true)
+          setShowWelcomePopup(true)
+        }
+      } catch (error) {
+        console.error('Error in checkFirstTimeUser:', error)
+      }
+    }
+
     if (user) {
       checkFirstTimeUser()
     }
-  }, [user])
+  }, [user, setIsFirstTime, setShowWelcomePopup])
 
-  const checkFirstTimeUser = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('onboarding_completed')
-        .eq('id', user?.id)
-        .single()
-
-      if (error) {
-        console.error('Error checking onboarding status:', error)
-        return
-      }
-
-      // If onboarding_completed is null or false, show welcome popup
-      if (!data?.onboarding_completed) {
-        setIsFirstTime(true)
-        setShowWelcomePopup(true)
-      }
-    } catch (error) {
-      console.error('Error in checkFirstTimeUser:', error)
-    }
-  }
 
   const handleSignOut = async () => {
     try {
@@ -156,6 +163,11 @@ export default function DashboardPage() {
     } catch (error) {
       console.error('Error in markOnboardingCompleted:', error)
     }
+  }
+
+  const handleOpenHabitModal = (category: string = 'general') => {
+    setSelectedHabitCategory(category)
+    setShowHabitModal(true)
   }
 
   if (loading) {
@@ -258,28 +270,28 @@ export default function DashboardPage() {
 
             {/* Module Header */}
             {(() => {
-              const module = developmentModules.find(m => m.id === expandedModule)
-              if (!module) return null
+              const currentModule = developmentModules.find(m => m.id === expandedModule)
+              if (!currentModule) return null
               
               return (
                 <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8">
                   <div className="flex items-center gap-6 mb-6">
-                    <div className={`w-16 h-16 ${module.color} rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg`}>
-                      {module.icon}
+                    <div className={`w-16 h-16 ${currentModule.color} rounded-2xl flex items-center justify-center text-white text-2xl shadow-lg`}>
+                      {currentModule.icon}
                     </div>
                     <div className="flex-1">
-                      <h1 className="text-3xl font-bold text-gray-900 mb-2">{module.title}</h1>
-                      <p className="text-gray-600 mb-4">{module.description}</p>
+                      <h1 className="text-3xl font-bold text-gray-900 mb-2">{currentModule.title}</h1>
+                      <p className="text-gray-600 mb-4">{currentModule.description}</p>
                       <div className="flex items-center gap-4">
                         <div className="flex-1">
                           <div className="w-full bg-gray-200 rounded-full h-3">
                             <div 
                               className="bg-gradient-to-r from-teal-500 to-purple-600 h-3 rounded-full transition-all duration-300"
-                              style={{ width: `${module.progress}%` }}
+                              style={{ width: `${currentModule.progress}%` }}
                             ></div>
                           </div>
                         </div>
-                        <span className="text-sm font-medium text-gray-500">{module.progress}% Complete</span>
+                        <span className="text-sm font-medium text-gray-500">{currentModule.progress}% Complete</span>
                         <button className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">
                           Continue Learning
                         </button>
@@ -309,13 +321,13 @@ export default function DashboardPage() {
                       <h3 className="text-xl font-bold text-gray-900 mb-4">Module Overview</h3>
                       <p className="text-gray-600 mb-4">Key concepts and goals for this development area</p>
                       <p className="text-gray-700 mb-6">
-                        This module focuses on helping you develop your {module.title.toLowerCase()} through structured lessons, 
+                        This module focuses on helping you develop your {currentModule.title.toLowerCase()} through structured lessons, 
                         assessments, and practical exercises. By the end, you'll have a clear understanding of how to 
                         integrate these concepts into your daily life.
                       </p>
                       <h4 className="font-semibold text-gray-900 mb-3">What You'll Learn:</h4>
                       <ul className="space-y-2 text-gray-600">
-                        <li>• Understand the importance of {module.title.toLowerCase()} in your overall development</li>
+                        <li>• Understand the importance of {currentModule.title.toLowerCase()} in your overall development</li>
                         <li>• Learn practical techniques to improve in this area</li>
                         <li>• Create an action plan tailored to your personal situation</li>
                         <li>• Track your progress and adapt as you grow</li>
@@ -343,9 +355,30 @@ export default function DashboardPage() {
 
                         <div className="bg-gray-50 rounded-lg p-4 mt-6">
                           <h4 className="font-semibold text-gray-900 mb-2">Recommended Next Steps:</h4>
-                          <p className="text-gray-600 text-sm">
+                          <p className="text-gray-600 text-sm mb-4">
                             Complete the module assessment to establish your baseline and receive personalized recommendations.
                           </p>
+                          
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleOpenHabitModal(currentModule.title)}
+                              className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-3 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity flex items-center gap-1"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                              </svg>
+                              Add Habit
+                            </button>
+                            <button
+                              onClick={() => handleOpenHabitModal(currentModule.title)}
+                              className="bg-white border border-teal-500 text-teal-600 px-3 py-2 rounded-lg text-sm font-medium hover:bg-teal-50 transition-colors flex items-center gap-1"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                              </svg>
+                              Browse
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -387,12 +420,35 @@ export default function DashboardPage() {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 p-4 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg border border-teal-200">
-                <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <span className="text-teal-600">🤖</span>
-                  Personal AI Assistant
-                </h3>
-                <p className="text-gray-600 text-sm">Your AI assistant is ready to help you with personalized guidance and insights. (Coming soon)</p>
+              <div className="mt-6 space-y-4">
+                <div className="p-4 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg border border-teal-200">
+                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-teal-600">🤖</span>
+                    Personal AI Assistant
+                  </h3>
+                  <p className="text-gray-600 text-sm">Your AI assistant is ready to help you with personalized guidance and insights. (Coming soon)</p>
+                </div>
+                
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => handleOpenHabitModal('general')}
+                    className="flex-1 bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Create Habit
+                  </button>
+                  <button
+                    onClick={() => handleOpenHabitModal('general')}
+                    className="flex-1 bg-white border-2 border-teal-500 text-teal-600 px-4 py-3 rounded-xl font-medium hover:bg-teal-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Find Habits
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -445,6 +501,14 @@ export default function DashboardPage() {
         onClose={() => setShowWelcomePopup(false)}
         onStartAssessment={handleStartAssessment}
         onSkipAssessment={handleSkipAssessment}
+      />
+
+      {/* Habit Modal */}
+      <HabitModal
+        isOpen={showHabitModal}
+        onClose={() => setShowHabitModal(false)}
+        selectedCategory={selectedHabitCategory}
+        userIsPremium={false} // TODO: Replace with actual premium status
       />
     </div>
   )
