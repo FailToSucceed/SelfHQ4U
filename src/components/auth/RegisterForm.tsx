@@ -2,10 +2,12 @@
 
 import { useState, useEffect } from 'react'
 import { signUp } from '@/lib/auth'
+import { isUsernameAvailable } from '@/lib/profiles'
 
 export default function RegisterForm() {
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
+  const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [address, setAddress] = useState('')
   const [password, setPassword] = useState('')
@@ -13,6 +15,8 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
+  const [usernameError, setUsernameError] = useState('')
+  const [checkingUsername, setCheckingUsername] = useState(false)
 
   // Animated text rotation
   const phrases = [
@@ -34,6 +38,50 @@ export default function RegisterForm() {
     return () => clearInterval(interval)
   }, [])
 
+  // Username validation
+  useEffect(() => {
+    const validateUsername = async () => {
+      if (!username) {
+        setUsernameError('')
+        return
+      }
+
+      // Basic validation
+      if (username.length < 3) {
+        setUsernameError('Username must be at least 3 characters')
+        return
+      }
+
+      if (username.length > 20) {
+        setUsernameError('Username must be 20 characters or less')
+        return
+      }
+
+      if (!/^[a-zA-Z0-9_]+$/.test(username)) {
+        setUsernameError('Username can only contain letters, numbers, and underscores')
+        return
+      }
+
+      // Check availability
+      try {
+        setCheckingUsername(true)
+        const available = await isUsernameAvailable(username)
+        if (!available) {
+          setUsernameError('Username is already taken')
+        } else {
+          setUsernameError('')
+        }
+      } catch (error) {
+        console.error('Error checking username:', error)
+      } finally {
+        setCheckingUsername(false)
+      }
+    }
+
+    const timeoutId = setTimeout(validateUsername, 500)
+    return () => clearTimeout(timeoutId)
+  }, [username])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -46,15 +94,29 @@ export default function RegisterForm() {
       return
     }
 
+    if (usernameError) {
+      setError('Please fix the username error before continuing')
+      setLoading(false)
+      return
+    }
+
+    if (!username) {
+      setError('Username is required')
+      setLoading(false)
+      return
+    }
+
     try {
       await signUp(email, password, {
         firstName,
         lastName,
+        username,
         address
       })
       setMessage('Application submitted successfully! Check your email to confirm your account.')
       setFirstName('')
       setLastName('')
+      setUsername('')
       setEmail('')
       setAddress('')
       setPassword('')
@@ -107,6 +169,38 @@ export default function RegisterForm() {
               className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all"
             />
           </div>
+        </div>
+
+        <div>
+          <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+            Username *
+          </label>
+          <div className="relative">
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-zA-Z0-9_]/g, ''))}
+              required
+              className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:border-transparent transition-all ${
+                usernameError 
+                  ? 'border-red-300 focus:ring-red-500' 
+                  : 'border-gray-300 focus:ring-teal-500'
+              }`}
+              placeholder="Choose a unique username"
+            />
+            {checkingUsername && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <div className="w-4 h-4 border-2 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            )}
+          </div>
+          {usernameError && (
+            <p className="text-red-600 text-xs mt-1">{usernameError}</p>
+          )}
+          {username && !usernameError && !checkingUsername && (
+            <p className="text-green-600 text-xs mt-1">✓ Username is available</p>
+          )}
         </div>
 
         <div>

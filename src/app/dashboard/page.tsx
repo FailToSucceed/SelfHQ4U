@@ -11,6 +11,13 @@ import { supabase } from '@/lib/supabase'
 import WelcomePopup from '@/components/onboarding/WelcomePopup'
 import HabitModal from '@/components/habits/HabitModal'
 import ActiveHabitsWidget from '@/components/habits/ActiveHabitsWidget'
+import UserStatsWidget from '@/components/gamification/UserStatsWidget'
+import ReflectionForm from '@/components/reflection/ReflectionForm'
+import ResourceSuggestionForm from '@/components/resources/ResourceSuggestionForm'
+import ResourcesList from '@/components/resources/ResourcesList'
+import { getCurrentUserProfile } from '@/lib/profiles'
+import type { UserProfile } from '@/types/profile'
+import LifePlanningView from '@/components/planning/LifePlanningView'
 
 const developmentModules = [
   {
@@ -97,36 +104,51 @@ export default function DashboardPage() {
   const [showHabitModal, setShowHabitModal] = useState(false)
   const [selectedHabitCategory, setSelectedHabitCategory] = useState('general')
   const [activeTab, setActiveTab] = useState('overview')
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null)
+  const [showLifePlanning, setShowLifePlanning] = useState(false)
 
-  // Check if user is first-time visitor
+  // Load user profile and check first-time visitor
   useEffect(() => {
-    const checkFirstTimeUser = async () => {
+    const loadUserProfile = async () => {
+      if (!user) return
+      
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('onboarding_completed')
-          .eq('id', user?.id)
-          .single()
-
-        if (error) {
-          console.error('Error checking onboarding status:', error)
-          return
-        }
-
-        // If onboarding_completed is null or false, show welcome popup
-        if (!data?.onboarding_completed) {
+        const profile = await getCurrentUserProfile()
+        setUserProfile(profile)
+        
+        // Check if first-time user
+        if (!profile?.onboarding_completed) {
           setIsFirstTime(true)
           setShowWelcomePopup(true)
         }
       } catch (error) {
-        console.error('Error in checkFirstTimeUser:', error)
+        console.error('Error loading user profile:', error)
+        // Fallback to check onboarding status from old table structure
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('onboarding_completed')
+            .eq('id', user.id)
+            .single()
+
+          if (error) {
+            console.error('Error checking onboarding status:', error)
+            return
+          }
+
+          // If onboarding_completed is null or false, show welcome popup
+          if (!data?.onboarding_completed) {
+            setIsFirstTime(true)
+            setShowWelcomePopup(true)
+          }
+        } catch (fallbackError) {
+          console.error('Error in checkFirstTimeUser:', fallbackError)
+        }
       }
     }
 
-    if (user) {
-      checkFirstTimeUser()
-    }
-  }, [user, setIsFirstTime, setShowWelcomePopup])
+    loadUserProfile()
+  }, [user])
 
 
   const handleSignOut = async () => {
@@ -206,6 +228,53 @@ export default function DashboardPage() {
     console.log('Completing habit:', habitId)
     // Update streak, last_completed_at, next_due in database
   }
+
+  // Mock user stats and leaderboard data
+  const userStats = {
+    totalPoints: 1250,
+    longestStreak: 21,
+    currentStreak: 7,
+    habitsCompleted: 34,
+    habitsCreated: 5,
+    habitsUsedByOthers: 12,
+    daysSignedInStreak: 14,
+    reflectionsCompleted: 8,
+    tasksCompleted: 23,
+    level: 3,
+    rank: 127,
+    totalUsers: 2845
+  }
+
+  const leaderboard = [
+    { id: 'user1', name: 'Sarah Chen', points: 3450, streak: 45, habitsCreated: 15, rank: 1 },
+    { id: 'user2', name: 'Alex Johnson', points: 3200, streak: 38, habitsCreated: 12, rank: 2 },
+    { id: 'user3', name: 'Maria Garcia', points: 2980, streak: 42, habitsCreated: 18, rank: 3 },
+    { id: 'current-user', name: 'You', points: userStats.totalPoints, streak: userStats.currentStreak, habitsCreated: userStats.habitsCreated, rank: userStats.rank },
+    { id: 'user4', name: 'David Kim', points: 2750, streak: 28, habitsCreated: 9, rank: 4 },
+    { id: 'user5', name: 'Lisa Wang', points: 2600, streak: 35, habitsCreated: 14, rank: 5 }
+  ]
+
+  // Get next due habit/task
+  const getNextDueItem = () => {
+    const today = new Date()
+    const tomorrow = new Date(today)
+    tomorrow.setDate(tomorrow.getDate() + 1)
+    
+    const dueTodayHabits = activeHabits.filter(h => new Date(h.nextDue).toDateString() === today.toDateString())
+    if (dueTodayHabits.length > 0) {
+      return { type: 'habit', title: dueTodayHabits[0].title, time: 'Due today' }
+    }
+    
+    const upcomingHabits = activeHabits.filter(h => new Date(h.nextDue) > today)
+    if (upcomingHabits.length > 0) {
+      const next = upcomingHabits.sort((a, b) => new Date(a.nextDue).getTime() - new Date(b.nextDue).getTime())[0]
+      return { type: 'habit', title: next.title, time: new Date(next.nextDue).toLocaleDateString() }
+    }
+    
+    return { type: 'task', title: 'Complete module assessment', time: 'Due in 2 days' }
+  }
+
+  const nextDueItem = getNextDueItem()
 
   const renderTabContent = (tab: string, currentModule: any) => {
     switch (tab) {
@@ -346,43 +415,7 @@ export default function DashboardPage() {
       case 'reflection':
         return (
           <>
-            <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-900 mb-4">Reflection & Alignment</h3>
-              <p className="text-gray-600 mb-6">Reflect on your progress and align with your values, vision, and mission</p>
-              
-              <div className="space-y-6">
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Values Alignment Check</h4>
-                  <p className="text-sm text-gray-600 mb-3">How well do your current habits align with your core values?</p>
-                  <div className="flex gap-2">
-                    {[1,2,3,4,5].map(rating => (
-                      <button key={rating} className="w-8 h-8 rounded-full border-2 border-teal-300 hover:bg-teal-100 flex items-center justify-center text-sm">
-                        {rating}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Progress Reflection</h4>
-                  <textarea 
-                    className="w-full p-3 border border-gray-300 rounded-lg resize-none" 
-                    rows={4}
-                    placeholder="What progress have you made this week? What challenges did you face? What would you do differently?"
-                  ></textarea>
-                </div>
-                
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <h4 className="font-semibold text-gray-900 mb-3">Vision Progress</h4>
-                  <p className="text-sm text-gray-600 mb-3">How are your current actions moving you toward your vision?</p>
-                  <textarea 
-                    className="w-full p-3 border border-gray-300 rounded-lg resize-none" 
-                    rows={3}
-                    placeholder="Reflect on how your daily habits and activities align with your long-term vision..."
-                  ></textarea>
-                </div>
-              </div>
-            </div>
+            <ReflectionForm />
           </>
         )
 
@@ -441,8 +474,16 @@ export default function DashboardPage() {
           </>
         )
 
+      case 'resources':
+        return (
+          <>
+            <ResourceSuggestionForm />
+            <ResourcesList />
+          </>
+        )
+
       default:
-        // For challenges, ai-assistant, resources, mentors, courses, events
+        // For challenges, ai-assistant, mentors, courses, events
         return (
           <>
             <div className="lg:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
@@ -497,7 +538,10 @@ export default function DashboardPage() {
             
             {/* Desktop Profile & Actions */}
             <div className="hidden sm:flex items-center gap-3">
-              <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors">
+              <button 
+                onClick={() => router.push('/profile')}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+              >
                 <span className="text-sm">👤 Profile</span>
               </button>
               <button
@@ -531,7 +575,10 @@ export default function DashboardPage() {
                 <a href="/dashboard" className="text-gray-900 font-medium">Dashboard</a>
                 <a href="#" className="text-gray-600 hover:text-gray-900 transition-colors">About</a>
                 <div className="border-t border-gray-200 pt-4 mt-4">
-                  <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-3">
+                  <button 
+                    onClick={() => router.push('/profile')}
+                    className="flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors mb-3"
+                  >
                     <span className="text-sm">👤 Profile</span>
                   </button>
                   <button
@@ -624,75 +671,97 @@ export default function DashboardPage() {
         ) : (
           // Main Dashboard View
           <div className="space-y-8">
-            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">Development Modules</h1>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900">
+              {userProfile?.username ? `${userProfile.username}'s SelfHQ` : 'Your SelfHQ'}
+            </h1>
             
             {/* Overview Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
-              {/* Overview Stats */}
-              <div className="lg:col-span-2 bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Your SelfHQ Overview</h2>
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                  <div className="text-center">
-                    <h3 className="font-semibold text-gray-900 mb-2">Active Habits</h3>
-                    <div className="text-2xl font-bold text-teal-600">{activeHabits.length}</div>
-                    <p className="text-gray-600 text-xs">Building momentum</p>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-semibold text-gray-900 mb-2">Streak</h3>
-                    <div className="text-2xl font-bold text-orange-600">
-                      {Math.max(...activeHabits.map(h => h.streak), 0)}
-                    </div>
-                    <p className="text-gray-600 text-xs">Best habit</p>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-semibold text-gray-900 mb-2">Modules</h3>
-                    <div className="text-2xl font-bold text-purple-600">3</div>
-                    <p className="text-gray-600 text-xs">In progress</p>
-                  </div>
-                  <div className="text-center">
-                    <h3 className="font-semibold text-gray-900 mb-2">Progress</h3>
-                    <div className="text-2xl font-bold text-blue-600">32%</div>
-                    <p className="text-gray-600 text-xs">Overall</p>
-                  </div>
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-8">
+              {/* Main Overview Stats */}
+              <div className="lg:col-span-5 bg-white/80 backdrop-blur-sm rounded-3xl shadow-lg border border-gray-200/50 p-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold text-gray-900">Overview</h2>
+                  <button
+                    onClick={() => setShowLifePlanning(!showLifePlanning)}
+                    className="flex items-center gap-2 text-teal-600 hover:text-teal-700 transition-colors"
+                  >
+                    <svg className={`w-4 h-4 transition-transform ${showLifePlanning ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                    <span className="text-sm font-medium">Life Planning</span>
+                  </button>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="p-4 bg-gradient-to-r from-teal-50 to-blue-50 rounded-lg border border-teal-200">
-                    <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <span className="text-teal-600">🤖</span>
-                      Personal AI Assistant
-                    </h3>
-                    <p className="text-gray-600 text-sm">Your AI assistant is ready to help you with personalized guidance and insights. (Coming soon)</p>
+                {/* Key Metrics */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <div className="text-center p-4 bg-gradient-to-br from-teal-50 to-teal-100 rounded-xl">
+                    <h3 className="font-semibold text-teal-800 mb-1">Active Habits</h3>
+                    <div className="text-3xl font-bold text-teal-600">{activeHabits.length}</div>
+                    <p className="text-teal-700 text-xs">Building momentum</p>
                   </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <button
-                      onClick={() => handleOpenHabitModal('general')}
-                      className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                      </svg>
-                      Create Habit
-                    </button>
-                    <button
-                      onClick={() => handleOpenHabitModal('general')}
-                      className="bg-white border-2 border-teal-500 text-teal-600 px-4 py-3 rounded-xl font-medium hover:bg-teal-50 transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                      </svg>
-                      Find Habits
-                    </button>
+                  <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl">
+                    <h3 className="font-semibold text-purple-800 mb-1">Points</h3>
+                    <div className="text-3xl font-bold text-purple-600">{userStats.totalPoints}</div>
+                    <p className="text-purple-700 text-xs">Level {userStats.level}</p>
                   </div>
                 </div>
+
+                {/* Next Due Item */}
+                <div className="mb-6 p-4 bg-gradient-to-r from-orange-50 to-red-50 rounded-xl border border-orange-200">
+                  <h3 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                    <span className="text-orange-600">⏰</span>
+                    Next Due
+                  </h3>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-medium text-gray-900">{nextDueItem.title}</p>
+                      <p className="text-sm text-gray-600">{nextDueItem.time}</p>
+                    </div>
+                    <div className="text-2xl">
+                      {nextDueItem.type === 'habit' ? '🎯' : '📝'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Quick Actions */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <button
+                    onClick={() => handleOpenHabitModal('general')}
+                    className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-4 py-3 rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Create Habit
+                  </button>
+                  <button
+                    onClick={() => handleOpenHabitModal('general')}
+                    className="bg-white border-2 border-teal-500 text-teal-600 px-4 py-3 rounded-xl font-medium hover:bg-teal-50 transition-colors flex items-center justify-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    Find Habits
+                  </button>
+                </div>
+                
+                {/* Life Planning View */}
+                <LifePlanningView isExpanded={showLifePlanning} />
               </div>
 
               {/* Active Habits Widget */}
-              <div className="lg:col-span-1">
+              <div className="lg:col-span-4">
                 <ActiveHabitsWidget 
                   habits={activeHabits} 
                   onCompleteHabit={handleCompleteHabit} 
+                />
+              </div>
+
+              {/* User Stats & Gamification */}
+              <div className="lg:col-span-3">
+                <UserStatsWidget 
+                  userStats={userStats}
+                  leaderboard={leaderboard}
                 />
               </div>
             </div>
@@ -700,17 +769,21 @@ export default function DashboardPage() {
             {/* Modules Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
           {developmentModules.map((module) => (
-            <div key={module.id} className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
+            <div 
+              key={module.id} 
+              onClick={() => setExpandedModule(module.id)}
+              className="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 hover:shadow-md hover:border-teal-200 transition-all duration-300 cursor-pointer group"
+            >
               {/* Icon and Progress */}
               <div className="flex items-center justify-between mb-4 sm:mb-6">
-                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${module.color} rounded-xl flex items-center justify-center text-white text-lg sm:text-xl`}>
+                <div className={`w-10 h-10 sm:w-12 sm:h-12 ${module.color} rounded-xl flex items-center justify-center text-white text-lg sm:text-xl group-hover:scale-105 transition-transform`}>
                   {module.icon}
                 </div>
                 <span className="text-xs sm:text-sm text-gray-500 font-medium">{module.progress}% Complete</span>
               </div>
               
               {/* Title and Description */}
-              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">{module.title}</h3>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight group-hover:text-teal-600 transition-colors">{module.title}</h3>
               <p className="text-gray-600 text-sm mb-4 sm:mb-6 leading-relaxed">{module.description}</p>
               
               {/* Progress Bar */}
@@ -723,16 +796,13 @@ export default function DashboardPage() {
                 </div>
               </div>
               
-              {/* Continue Button */}
-              <button 
-                onClick={() => setExpandedModule(module.id)}
-                className="w-full flex items-center justify-between text-gray-900 font-medium hover:text-teal-600 transition-colors group py-2"
-              >
-                <span className="text-sm sm:text-base">Continue</span>
+              {/* Expand Button */}
+              <div className="w-full flex items-center justify-between text-gray-900 font-medium group-hover:text-teal-600 transition-colors py-2">
+                <span className="text-sm sm:text-base">Expand</span>
                 <svg className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
-              </button>
+              </div>
             </div>
           ))}
             </div>

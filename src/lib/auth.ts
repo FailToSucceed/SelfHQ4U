@@ -7,6 +7,7 @@ export interface AuthError {
 export async function signUp(email: string, password: string, metadata?: {
   firstName?: string
   lastName?: string
+  username?: string
   address?: string
 }) {
   const { data, error } = await supabase.auth.signUp({
@@ -21,21 +22,8 @@ export async function signUp(email: string, password: string, metadata?: {
     throw new Error(error.message)
   }
 
-  // If user is created and we have metadata, update the profile
-  if (data.user && metadata) {
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .update({
-        first_name: metadata.firstName,
-        last_name: metadata.lastName,
-        address: metadata.address
-      })
-      .eq('id', data.user.id)
-
-    if (profileError) {
-      console.error('Profile update error:', profileError)
-    }
-  }
+  // Profile will be automatically created by the database trigger
+  // with the username from metadata
   
   return data
 }
