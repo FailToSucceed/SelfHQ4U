@@ -17,10 +17,10 @@ export default function Home() {
         </nav>
         
         <div className="flex items-center gap-4">
-          <button className="text-gray-600 hover:text-gray-900">Profile</button>
-          <button className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">
+          <a href="/login" className="text-gray-600 hover:text-gray-900">Login</a>
+          <a href="/register" className="bg-gradient-to-r from-teal-500 to-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:opacity-90">
             Get Started
-          </button>
+          </a>
         </div>
       </header>
 
@@ -53,13 +53,13 @@ export default function Home() {
         </p>
         
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-          <button className="bg-gradient-to-r from-teal-500 to-purple-600 text-white px-8 py-4 rounded-lg font-medium text-lg hover:opacity-90 flex items-center gap-2">
+          <a href="/register" className="bg-gradient-to-r from-teal-500 to-purple-600 text-white px-8 py-4 rounded-lg font-medium text-lg hover:opacity-90 flex items-center gap-2">
             Start by opening your HQ
             <span>→</span>
-          </button>
-          <button className="text-gray-900 font-medium text-lg hover:text-gray-700">
+          </a>
+          <a href="/dashboard" className="text-gray-900 font-medium text-lg hover:text-gray-700">
             See example of the dashboard
-          </button>
+          </a>
         </div>
       </section>
 
