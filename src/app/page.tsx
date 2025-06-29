@@ -1,6 +1,10 @@
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
+      {/* Red Banner */}
+      <div className="bg-red-600 text-white text-center py-4 font-bold text-lg">
+        New Version works
+      </div>
       {/* Header */}
       <header className="flex items-center justify-between px-8 py-6 max-w-7xl mx-auto">
         <div className="flex items-center gap-3">
