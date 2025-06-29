@@ -87,15 +87,70 @@ Create a modern platform that helps people:
 
 ## 🎨 Design & Brand Guidelines
 
-**Visual Identity**: SelfHQ should exude **exclusivity, prestige, and modern sophistication**
-- Use premium gradients, subtle shadows, and refined typography
-- Implement glassmorphism effects (backdrop-blur, transparency)
-- Apply luxury color palettes with deep blues, elegant grays, and accent teals
-- Create elevated user experiences that feel exclusive and high-end
-- Design should appeal to high achievers and ambitious professionals
-- All interactions should feel premium and intentional
-- Use sophisticated animations and micro-interactions
-- Maintain clean, minimal aesthetics with purposeful whitespace
+### 🎨 Visual Identity
+
+SelfHQ should evoke exclusivity, prestige, and modern sophistication.
+
+✅ Use premium gradients, subtle shadows, and refined typography  
+✅ Implement glassmorphism effects (backdrop-blur, transparency)  
+✅ Apply a luxury color palette with deep blues, elegant grays, and accent teals  
+✅ Prioritize clean, minimal layouts with generous whitespace  
+✅ Integrate polished micro-interactions and smooth animations  
+✅ All components and interactions should feel premium and intentional  
+✅ The look and feel should appeal to high achievers, ambitious professionals, and those seeking a top-tier experience  
+
+### 🌈 Color Palette
+
+| Color Name | Hex Code | Purpose |
+|------------|----------|---------|
+| Primary Blue | #2563EB | Main CTAs, buttons, links |
+| Royal Purple | #7C3AED | Accent color, gradient stop |
+| Teal Accent | #14B8A6 | Highlights, success states |
+| Deep Navy | #0F172A | Headings, dark sections, contrast |
+| Elegant Gray | #F1F5F9 | Backgrounds, cards |
+| White | #FFFFFF | Base background, clean canvas |
+| Soft Shadow Gray | #CBD5E1 | Shadows, subtle borders or dividers |
+
+**✨ Gradient examples:**
+- `bg-gradient-to-r from-[#2563EB] to-[#7C3AED]`
+- `bg-gradient-to-r from-[#2563EB] to-[#14B8A6]`
+
+### 🧩 Component Guidelines
+
+- **Buttons:** Gradient backgrounds, rounded-xl, shadow-md, hover:scale-105, hover:brightness-110
+- **Cards / Modules:** Glassmorphism: bg-white/30 + backdrop-blur-md, rounded-2xl, shadow-lg
+- **Navigation:** Transparent navbar with blur on scroll, minimal active indicators
+- **Progress bars:** rounded-full, gradient fill for progress
+- **Typography:** Clean geometric sans (e.g. Inter, Poppins, Outfit), strong hierarchy, large clear headings
+
+### ⚙ Tailwind Config Snippet
+
+```javascript
+// tailwind.config.ts
+theme: {
+  extend: {
+    colors: {
+      primary: '#2563EB',
+      secondary: '#7C3AED',
+      accent: '#14B8A6',
+      navy: '#0F172A',
+      grayElegant: '#F1F5F9',
+      shadowGray: '#CBD5E1',
+    },
+  },
+},
+```
+
+### ✨ Interaction Design
+
+✅ All UI elements should have clear, subtle animations:
+- **Buttons:** scale, brightness change
+- **Cards:** slight lift on hover
+- **Progress indicators:** smooth fill animations
+- **Transitions:** ease-in-out, duration-300 or smoother
+
+**👉 Summary:**  
+The entire interface should feel clean, purposeful, and elite — users should sense they're in a premium environment where every interaction is thoughtfully crafted.
 
 ## 🚀 Development Commands
 
