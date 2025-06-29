@@ -35,7 +35,7 @@ export default function Home() {
         <h1 className="text-5xl md:text-6xl font-bold mb-8">
           Welcome to your{" "}
           <span className="bg-gradient-to-r from-blue-400 to-purple-600 bg-clip-text text-transparent">
-            HQ
+            SelfHQ
           </span>
         </h1>
         
